@@ -2,6 +2,26 @@
 
 This contains various tools helping to manage translations in renpy.
 
+## sort_translates
+
+This is a cleanup tool for your translation files.
+
+When you add dialogue to your game, or when you edit dialogue lines without adding an `id` clause, then regenerate
+translations from the launcher, the new dialogue lines are put at the end of the file, beneath the `translate strings` blocks -
+if any.
+
+This helps with that situation. It reorders every block in the translation files of the provided languages, so that you have :
+- first the "good" translations of actually valid dialogue lines, which get sorted to reflect the order of the original dialogue,
+- then the `translate strings` block(s),
+- and at the end, the obsolete or orphan translation blocks, beneath a comment saying what they are.
+
+The orphan blocks are not removed, because you may want to use their content to translate the blocks they replaced, or to
+add their `id` clauses to dialogue lines you edited.
+
+The tools is careful to keep every line in the file, none is removed, they are only moved around. But be careful, comments or
+other renpy code between translation blocks will be ignored and may be displaced along with their surroundings to random places
+within the file.
+
 ## add_languages
 
 This helps in a situation where you have a game in language A, say french, it's already been translated in B, a more franca
