@@ -81,3 +81,10 @@ translate target start_2:
 
     e "Deuxième message"
 ```
+
+To use it, simply frop the _ren.py file in your game's repository, generate from the launcher the "target" translations on
+which you want to add these comments, the open the game, hit Shift+O (the letter) to open the console, and call
+`translation_tools.add_languages()`. The first parameter should contain either the language or a list of languages you
+want to receive the comments, and the second parameter should receive a list of languages whose transations will be added
+as comments. If the second parameter is not given, all existing translations, except the target ones, will be added as
+comments. You can then delete the _ren.py and the .rpyc files from your game.
