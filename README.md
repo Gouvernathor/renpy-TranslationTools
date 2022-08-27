@@ -23,8 +23,11 @@ add their `id` clauses to dialogue lines you edited.
 Warning : to minimize risks of bugs, files with no orphan nodes are skipped, and their translate blocks are not ordered.
 If you want to sort every file, remove the `if not has_orphans:` `continue` block in the function.
 
-To use, simply drag the _ren.py file in your game's `game/` folder, then open the console with Shift+O (the letter) and call
+To use, simply drag the \_ren.py file in your game's `game/` folder, then open the console with Shift+O (the letter) and call
 `translation_tools.sort_translates()`. You can optionally pass a language or list of languages as parameter.
+
+The tool leaves by default a copy of the untouched file, renamed as .bkp. To disable this, pass `leave_backup=False` to the
+function.
 
 ## add_languages
 
@@ -106,9 +109,9 @@ translate target start_2:
     e "Deuxième message"
 ```
 
-To use it, simply frop the _ren.py file in your game's repository, generate from the launcher the "target" translations on
+To use it, simply frop the \_ren.py file in your game's repository, generate from the launcher the "target" translations on
 which you want to add these comments, the open the game, hit Shift+O (the letter) to open the console, and call
 `translation_tools.add_languages()`. The first parameter should contain either the language or a list of languages you
 want to receive the comments, and the second parameter should receive a list of languages whose transations will be added
 as comments. If the second parameter is not given, all existing translations, except the target ones, will be added as
-comments. You can then delete the _ren.py and the .rpyc files from your game.
+comments. You can then delete the \_ren.py and the .rpyc files from your game.
