@@ -22,6 +22,9 @@ The tools is careful to keep every line in the file, none is removed, they are o
 other renpy code between translation blocks will be ignored and may be displaced along with their surroundings to random places
 within the file.
 
+To use, simply drag the _ren.py file in your game's `game/` folder, then open the console with Shift+O (the letter) and call
+`translation_tools.sort_translates()`. You can optionally pass a language or list of languages as parameter.
+
 ## add_languages
 
 This helps in a situation where you have a game in language A, say french, it's already been translated in B, a more franca
