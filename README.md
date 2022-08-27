@@ -15,12 +15,13 @@ This helps with that situation. It reorders every block in the translation files
 - then the `translate strings` block(s),
 - and at the end, the obsolete or orphan translation blocks, beneath a comment saying what they are.
 
-The orphan blocks are not removed, because you may want to use their content to translate the blocks they replaced, or to
-add their `id` clauses to dialogue lines you edited.
-
 The tools is careful to keep every line in the file, none is removed, they are only moved around. But be careful, comments or
 other renpy code between translation blocks will be ignored and may be displaced along with their surroundings to random places
-within the file.
+within the file. The orphan blocks are not removed, because you may want to use their content to translate the blocks they replaced, or to
+add their `id` clauses to dialogue lines you edited.
+
+Warning : to minimize risks of bugs, files with no orphan nodes are skipped, and their translate blocks are not ordered.
+If you want to sort every file, remove the `if not has_orphans:` `continue` block in the function.
 
 To use, simply drag the _ren.py file in your game's `game/` folder, then open the console with Shift+O (the letter) and call
 `translation_tools.sort_translates()`. You can optionally pass a language or list of languages as parameter.
