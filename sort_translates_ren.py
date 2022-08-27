@@ -8,7 +8,7 @@ init python in translation_tools:
 from collections import defaultdict
 import itertools
 
-def sort_translates(languages=None):
+def sort_translates(languages=None, leave_backup=True):
     """
     Puts the orphan translations at the end of the file they're in, and (as a side-effect)
     orders the non-obsolete translations in the order of the dialogue they're translating.
@@ -116,13 +116,18 @@ def sort_translates(languages=None):
 
             print("Writing sorted file {}".format(fn))
             long_fn = basedir+fn
-            with open(long_fn+".new", "w", encoding="utf-8") as f:
-                f.write("\n".join(orderedblocks))
 
-            try:
-                os.unlink(long_fn + ".bak")
-            except Exception:
-                pass
+            if leave_backup:
+                with open(long_fn+".new", "w", encoding="utf-8") as f:
+                    f.write("\n".join(orderedblocks))
 
-            os.rename(long_fn, long_fn + ".bak")
-            os.rename(long_fn + ".new", long_fn)
+                try:
+                    os.unlink(long_fn + ".bak")
+                except Exception:
+                    pass
+
+                os.rename(long_fn, long_fn + ".bak")
+                os.rename(long_fn + ".new", long_fn)
+            else:
+                with open(long_fn, "w", encoding="utf-8") as f:
+                    f.write("\n".join(orderedblocks))
