@@ -6,7 +6,7 @@ init python in translation_tools:
 
 from collections import defaultdict
 
-def add_languages(target_langs, lang_list=None, remove_old = False):
+def add_languages(target_langs, lang_list=None, remove_old = False, language_hint = True):
     """
     Adds commented-out translations in the `lang_list` languages
     for each translation of language `target_langs`.
@@ -71,7 +71,7 @@ def add_languages(target_langs, lang_list=None, remove_old = False):
             good_lines = [line.partition("#")[0].strip() for line in good_lines]
             good_lines = tuple(filter(None, good_lines))
             if good_lines:
-                lines_to_copy[nod.identifier].append("\n".join("    # "+line for line in (nod.language,)+good_lines))
+                lines_to_copy[nod.identifier].append("\n".join("    # "+line for line in ((nod.language,) if language_hint else tuple())+good_lines))
 
     for nod in sorted(renpy.game.script.all_stmts, key=(lambda n:(n.filename, -n.linenumber))):
         if isinstance(nod, renpy.ast.Translate) and nod.language in target_langs:
@@ -107,11 +107,12 @@ def add_language_command():
     ap.add_argument("languages", default=[], nargs='*', action="store", help="The translation languages to update.")
     ap.add_argument("--source-language", "-s", default=[], action="append", help="The commented-out language to add.")
     ap.add_argument("--cleanup", "-c", default=False, action="store_true", help="Whether to remove old translation hints.")
+    ap.add_argument("--no-language", dest='language', default=True, action="store_false", help="Disable language name insertion when adding languages.")
 
     args = ap.parse_args()
 
     print("Adding sources to languages {}".format(args.languages))
-    add_languages(args.languages, set(args.source_language) or None, args.cleanup)
+    add_languages(args.languages, set(args.source_language) or None, args.cleanup, args.language)
 
     exit(0)
 
