@@ -6,7 +6,7 @@ init python in translation_tools:
 
 from collections import defaultdict
 
-def add_languages(target_langs, lang_list=None):
+def add_languages(target_langs, lang_list=None, remove_old = False):
     """
     Adds commented-out translations in the `lang_list` languages
     for each translation of language `target_langs`.
@@ -79,7 +79,24 @@ def add_languages(target_langs, lang_list=None):
             with open(long_fn, 'r', encoding = "utf-8") as f:
                 filelines = f.read().splitlines()
 
-            filelines.insert(nod.next.linenumber-1, "\n" + "\n\n".join(lines_to_copy[nod.identifier]) + "\n")
+            line_offset = 1
+            if remove_old:
+                original_filelines_len = len(filelines)
+                filelines = [
+                    *filelines[:nod.linenumber],
+                    *filter(
+                        lambda x: not x.startswith("    #") and x.strip(),
+                        filelines[nod.linenumber:nod.next.linenumber]
+                    ),
+                    *filelines[nod.next.linenumber:],
+                ]
+                line_offset += original_filelines_len-len(filelines)
+
+            filelines.insert(
+                nod.next.linenumber-line_offset,
+                "\n" + "\n\n".join(lines_to_copy[nod.identifier]) + "\n",
+            )
+
             filelines.append("")
             with open(long_fn, "w", encoding="utf-8") as f:
                 f.write("\n".join(filelines))
@@ -89,11 +106,12 @@ def add_language_command():
 
     ap.add_argument("languages", default=[], nargs='*', action="store", help="The translation languages to update.")
     ap.add_argument("--source-language", "-s", default=[], action="append", help="The commented-out language to add.")
+    ap.add_argument("--cleanup", "-c", default=False, action="store_true", help="Whether to remove old translation hints.")
 
     args = ap.parse_args()
 
     print("Adding sources to languages {}".format(args.languages))
-    add_languages(args.languages, set(args.source_language) or None)
+    add_languages(args.languages, set(args.source_language) or None, args.cleanup)
 
     exit(0)
 
