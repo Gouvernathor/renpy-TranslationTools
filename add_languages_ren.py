@@ -5,6 +5,7 @@ init python in translation_tools:
 """
 
 from collections import defaultdict
+import os
 
 def add_languages(target_langs, lang_list=None, remove_old = False, language_hint = True):
     """
@@ -22,8 +23,6 @@ def add_languages(target_langs, lang_list=None, remove_old = False, language_hin
     in the first loop, then opening them all, and closing them all in the end.
     But time consumption is not a concern.
     """
-
-    import os
 
     set_all = set(renpy.known_languages())
 
@@ -71,7 +70,9 @@ def add_languages(target_langs, lang_list=None, remove_old = False, language_hin
             good_lines = [line.partition("#")[0].strip() for line in good_lines]
             good_lines = tuple(filter(None, good_lines))
             if good_lines:
-                lines_to_copy[nod.identifier].append("\n".join("    # "+line for line in ((nod.language,) if language_hint else tuple())+good_lines))
+                if language_hint:
+                    good_lines = (nod.language,) + good_lines
+                lines_to_copy[nod.identifier].append("\n".join("    # "+line for line in good_lines))
 
     for nod in sorted(renpy.game.script.all_stmts, key=(lambda n:(n.filename, -n.linenumber))):
         if isinstance(nod, renpy.ast.Translate) and nod.language in target_langs:
@@ -116,4 +117,4 @@ def add_language_command():
 
     exit(0)
 
-renpy.store.renpy.arguments.register_command("add_translation_source", add_language_command)
+renpy.store.renpy.arguments.register_command("add_language", add_language_command)

@@ -1,5 +1,4 @@
 import renpy
-import os
 
 """renpy
 init python in translation_tools:
@@ -7,6 +6,7 @@ init python in translation_tools:
 
 from collections import defaultdict
 import itertools
+import os
 
 def sort_translates(languages=None, leave_backup=True):
     """
@@ -16,7 +16,6 @@ def sort_translates(languages=None, leave_backup=True):
     If `languages` is given, only the translations for these languages are sorted.
     `languages` can be a single language name or a list of language names.
     """
-    import os
 
     set_all = set(renpy.known_languages())
 
@@ -145,4 +144,4 @@ def sort_translates_command():
 
     exit(0)
 
-renpy.store.renpy.arguments.register_command("cleanup_translation", sort_translates_command)
+renpy.store.renpy.arguments.register_command("sort_translates", sort_translates_command)
