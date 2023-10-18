@@ -29,6 +29,10 @@ To use, simply drag the \_ren.py file in your game's `game/` folder, then open t
 The tool leaves by default a copy of the untouched file, renamed as .bkp. To disable this, pass `leave_backup=False` to the
 function.
 
+To use it from the command-line, call the tool with the command `sort_translates`, a list of languages, and the option `--backup` to
+generate the backup files. For example, if you want to sort the `french` and `english` translations and not keep any backup,
+call `renpy.sh path/to/your/game sort_translates french english`
+
 ## add_languages
 
 This helps in a situation where you have a game in language A, say french, it's already been translated in B, a more franca
@@ -114,4 +118,12 @@ which you want to add these comments, the open the game, hit Shift+O (the letter
 `translation_tools.add_languages()`. The first parameter should contain either the language or a list of languages you
 want to receive the comments, and the second parameter should receive a list of languages whose transations will be added
 as comments. If the second parameter is not given, all existing translations, except the target ones, will be added as
-comments. You can then delete the \_ren.py and the .rpyc files from your game.
+comments. Additional supported parameters are `remove_old`, which may be set to `True` to remove any existing comment in
+an updated translation's section, and `language_hint`, which may be set to `False` to disable the insertion of the language's
+name before the translated string.
+
+To use it from the command-line, call the tool with the command `add_languages`, a list of languages to update, a list of
+languages to add with the option `-s`, the option `--cleanup` to remove any existing translation example, and the option
+`--no-language` to add translation strings without their source language. For example, if you want to update the `english`
+translation with `french` translations as reference and remove any other reference, call
+`renpy.sh path/to/your/game add_languages french -s english --cleanup --no-language`.

@@ -1,5 +1,4 @@
 import renpy
-import os
 
 """renpy
 init python in translation_tools:
@@ -7,6 +6,7 @@ init python in translation_tools:
 
 from collections import defaultdict
 import itertools
+import os
 
 def sort_translates(languages=None, leave_backup=True):
     """
@@ -31,8 +31,6 @@ def sort_translates(languages=None, leave_backup=True):
         if unknowns:
             raise ValueError("languages contains unknown languages : {}".format(unknowns))
 
-    basedir = renpy.config.basedir.replace("\\", "/") + "/"
-
     dialogue = {} # identifier : (filename, linenumber)
     trans = {lang : defaultdict(list) for lang in languages} # language : filename : list of nodes
     transstring = defaultdict(list) # filename : list of "translate strings" nodes (which are actually init nodes)
@@ -53,9 +51,10 @@ def sort_translates(languages=None, leave_backup=True):
     warning_comment = "\n# TODO: The following nodes are orphans, trying to translate an identifier that's not in the game.\n"
     for subdict in trans.values():
         for fn, nodlist in sorted(subdict.items()):
+            long_fn = os.path.join(renpy.config.basedir, fn)
             has_orphans = False
 
-            with renpy.open_file(basedir+fn, "utf-8") as f:
+            with open(long_fn, "r", encoding = "utf-8") as f:
                 lines = f.read().splitlines()
 
             boundaries = {} # linenumber : (language, identifier)
@@ -115,7 +114,6 @@ def sort_translates(languages=None, leave_backup=True):
             orderedblocks = [block for _key, block in sorted(blocks.items(), key=block_sort_function)]
 
             print("Writing sorted file {}".format(fn))
-            long_fn = basedir+fn
 
             if leave_backup:
                 with open(long_fn+".new", "w", encoding="utf-8") as f:
@@ -131,3 +129,19 @@ def sort_translates(languages=None, leave_backup=True):
             else:
                 with open(long_fn, "w", encoding="utf-8") as f:
                     f.write("\n".join(orderedblocks))
+
+def sort_translates_command():
+
+    ap = renpy.arguments.ArgumentParser()
+
+    ap.add_argument("languages", default=[], nargs='+', action="store", help="The translation languages to update.")
+    ap.add_argument("--backup", "-k", default=False, action="store_true", help="Whether to keep obsolete translations.")
+
+    args = ap.parse_args()
+
+    print("Adding sources to languages {}".format(args.languages))
+    sort_translates(args.languages, args.backup)
+
+    exit(0)
+
+renpy.store.renpy.arguments.register_command("sort_translates", sort_translates_command)
