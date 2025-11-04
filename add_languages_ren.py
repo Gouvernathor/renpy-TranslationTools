@@ -58,10 +58,9 @@ def add_languages(target_langs, lang_list=None, remove_old = False, language_hin
     lines_to_copy = defaultdict(list) # identifier : list of blocks of lines (list of str)
     for nodlist in dic.values():
         for nod in nodlist:
-            next = nod
-            while not isinstance(next.next, renpy.ast.EndTranslate):
-                next = next.next
-            start, end = nod.linenumber+1-1, next.linenumber-1
+            if not nod.block:
+                continue
+            start, end = nod.block[0].linenumber-1, nod.block[-1].linenumber-1
 
             with open(os.path.join(basedir, nod.filename), 'r', encoding = "utf-8") as f:
                 filelines = f.read().splitlines()
