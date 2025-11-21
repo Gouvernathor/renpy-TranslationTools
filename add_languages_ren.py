@@ -49,18 +49,21 @@ def add_languages(target_langs, lang_list=None, remove_old = False, language_hin
 
     basedir = renpy.config.basedir
 
-    dic = defaultdict(list) # identifier : list of nodes
+    dic = defaultdict(list) # say/translation identifier : list of nodes translating it in various languages
     for nod in renpy.game.script.all_stmts:
-        if isinstance(nod, renpy.ast.Translate):
+        if isinstance(nod, (renpy.ast.Translate, renpy.ast.TranslateSay)):
             if nod.language in lang_list:
                 dic[nod.identifier].append(nod)
 
     lines_to_copy = defaultdict(list) # identifier : list of blocks of lines (list of str)
     for nodlist in dic.values():
         for nod in nodlist:
-            if not nod.block:
-                continue
-            start, end = nod.block[0].linenumber-1, nod.block[-1].linenumber-1
+            if isinstance(nod, renpy.ast.TranslateSay):
+                start, end = nod.linenumber-1, nod.linenumber
+            else:
+                if not nod.block:
+                    continue
+                start, end = nod.block[0].linenumber-1, nod.block[-1].linenumber-1
 
             with open(os.path.join(basedir, nod.filename), 'r', encoding = "utf-8") as f:
                 filelines = f.read().splitlines()
