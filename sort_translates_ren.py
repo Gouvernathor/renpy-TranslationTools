@@ -35,11 +35,11 @@ def sort_translates(languages=None, leave_backup=True):
     trans = {lang : defaultdict(list) for lang in languages} # language : filename : list of nodes
     transstring = defaultdict(list) # filename : list of "translate strings" nodes (which are actually init nodes)
     for nod in renpy.game.script.all_stmts:
-        if isinstance(nod, renpy.ast.Translate):
+        if isinstance(nod, (renpy.ast.Translate, renpy.ast.TranslateSay)):
             if nod.language is None:
                 dialogue[nod.identifier] = (nod.filename, nod.linenumber)
             elif nod.language in languages:
-                if "/tl/"+nod.language+"/" in nod.filename:
+                if f"/tl/{nod.language}/" in nod.filename:
                     trans[nod.language][nod.filename].append(nod)
         elif isinstance(nod, renpy.ast.Init) and all(isinstance(n, renpy.ast.TranslateString) for n in nod.block):
             if "/tl/" in nod.filename:
@@ -61,10 +61,14 @@ def sort_translates(languages=None, leave_backup=True):
             for nod in itertools.chain(nodlist, transstring[fn]):
                 linenumber = nod.linenumber-1
 
+                if isinstance(nod, renpy.ast.TranslateSay):
+                    while linenumber > 0 and not lines[linenumber].startswith("translate "):
+                        linenumber -= 1
+
                 while lines[linenumber-1].startswith("#"):
                     linenumber -= 1
 
-                if isinstance(nod, renpy.ast.Translate):
+                if isinstance(nod, (renpy.ast.Translate, renpy.ast.TranslateSay)):
                     boundaries[linenumber] = (nod.language, nod.identifier)
                     if (not has_orphans) and (nod.identifier not in dialogue):
                         has_orphans = True
