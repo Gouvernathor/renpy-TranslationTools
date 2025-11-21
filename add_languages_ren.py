@@ -49,19 +49,21 @@ def add_languages(target_langs, lang_list=None, remove_old = False, language_hin
 
     basedir = renpy.config.basedir
 
-    dic = defaultdict(list) # identifier : list of nodes
+    dic = defaultdict(list) # say/translation identifier : list of nodes translating it in various languages
     for nod in renpy.game.script.all_stmts:
-        if isinstance(nod, renpy.ast.Translate):
+        if isinstance(nod, (renpy.ast.Translate, renpy.ast.TranslateSay)):
             if nod.language in lang_list:
                 dic[nod.identifier].append(nod)
 
     lines_to_copy = defaultdict(list) # identifier : list of blocks of lines (list of str)
     for nodlist in dic.values():
         for nod in nodlist:
-            next = nod
-            while not isinstance(next.next, renpy.ast.EndTranslate):
-                next = next.next
-            start, end = nod.linenumber+1-1, next.linenumber-1
+            if isinstance(nod, renpy.ast.TranslateSay):
+                start, end = nod.linenumber-1, nod.linenumber
+            else:
+                if not nod.block:
+                    continue
+                start, end = nod.block[0].linenumber-1, nod.block[-1].linenumber-1
 
             with open(os.path.join(basedir, nod.filename), 'r', encoding = "utf-8") as f:
                 filelines = f.read().splitlines()
@@ -75,26 +77,35 @@ def add_languages(target_langs, lang_list=None, remove_old = False, language_hin
                 lines_to_copy[nod.identifier].append("\n".join("    # "+line for line in good_lines))
 
     for nod in sorted(renpy.game.script.all_stmts, key=(lambda n:(n.filename, -n.linenumber))):
-        if isinstance(nod, renpy.ast.Translate) and nod.language in target_langs:
+        if isinstance(nod, (renpy.ast.Translate, renpy.ast.TranslateSay)) and nod.language in target_langs:
             long_fn = os.path.join(basedir, nod.filename)
             with open(long_fn, 'r', encoding = "utf-8") as f:
                 filelines = f.read().splitlines()
+
+            if isinstance(nod, renpy.ast.TranslateSay):
+                start = end = nod.linenumber
+                # warning : this is ugly, because the TranslateSay combining process
+                # erases the information of where the "translate " line is.
+                while start > 0 and not filelines[start-1].startswith("translate "):
+                    start -= 1
+            else:
+                start, end = nod.linenumber, nod.next.linenumber
 
             line_offset = 1
             if remove_old:
                 original_filelines_len = len(filelines)
                 filelines = [
-                    *filelines[:nod.linenumber],
+                    *filelines[:start],
                     *filter(
                         lambda x: not x.startswith("    #") and x.strip(),
-                        filelines[nod.linenumber:nod.next.linenumber]
+                        filelines[start:end]
                     ),
-                    *filelines[nod.next.linenumber:],
+                    *filelines[end:],
                 ]
                 line_offset += original_filelines_len-len(filelines)
 
             filelines.insert(
-                nod.next.linenumber-line_offset,
+                end-line_offset,
                 "\n" + "\n\n".join(lines_to_copy[nod.identifier]) + "\n",
             )
 
